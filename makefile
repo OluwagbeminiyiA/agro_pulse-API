@@ -1,4 +1,4 @@
-.PHONY: run-server lint all clean test
+.PHONY: run-server lint all clean test migrations migrate test-account
 
 all:
 	lint
@@ -14,3 +14,9 @@ run-server:
 
 lint:
 	poetry run pre-commit run --all-files
+
+migrations:
+	poetry run python -m core_agropulse.manage makemigrations
+
+migrate:
+	poetry run python -m core_agropulse.manage migrate
