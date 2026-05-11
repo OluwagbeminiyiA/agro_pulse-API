@@ -1,0 +1,48 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0  # Updated
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: check-ast            # Added: Validates Python syntax
+    -   id: debug-statements     # Added: Catches forgotten breakpoints
+#    -   id: no-commit-to-branch
+#        name: "🌳 git · Protect main branches"
+#        args: [ "--branch", "main", "--branch", "master" ]
+
+-   repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0 # Updated
+    hooks:
+    -   id: gitleaks
+        name: "🔒 security · Detect hardcoded secrets"
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.12
+    hooks:
+    -   id: ruff-format
+        name: "🐍 python · Format with Ruff"
+    -   id: ruff
+        name: "🐍 python · Lint with Ruff"
+        args: [ --fix, --exit-non-zero-on-fix ]
+
+-   repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+    -   id: validate-pyproject
+        name: "🐍 python · Validate pyproject.toml"
+        additional_dependencies: ["validate-pyproject-schema-store[all]"]
+
+-   repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.2
+    hooks:
+    -   id: check-github-workflows
+        name: "🐙 github-actions · Validate gh workflow files"
+        args: ["--verbose"]
+
+-   repo: https://github.com/mrtazz/checkmake.git
+    rev: v0.3.0
+    hooks:
+    -   id: checkmake
+        name: "🐮 Makefile · Lint Makefile"
