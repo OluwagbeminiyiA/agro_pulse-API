@@ -1,4 +1,4 @@
-.PHONY: run-server lint all clean test migrations migrate test-account
+.PHONY: run-server lint all clean test migrations migrate test-accounts test-farm_produce
 
 all:
 	lint
@@ -20,3 +20,9 @@ migrations:
 
 migrate:
 	poetry run python -m core_agropulse.manage migrate
+
+test-accounts:
+	poetry run python -m core_agropulse.manage test core_agropulse.accounts.tests
+
+test-farm_produce:
+	poetry run python -m core_agropulse.manage test core_agropulse.produce.tests
