@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_otp.plugins.otp_email.models import EmailDevice
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core_agropulse.accounts.models import (
     User,
@@ -18,6 +19,7 @@ from core_agropulse.accounts.serializers import (
     BuyerProfileSerializer,
     TransporterProfileSerializer,
     EmailOtpVerifySerializer,
+    LoginSerializer,
 )
 
 
@@ -96,6 +98,25 @@ class UserViewSet(viewsets.ModelViewSet):
         """Get current user details"""
         serializer = UserDetailSerializer(request.user)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def login(self, request):
+        """Login with email and password, returns JWT tokens"""
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": UserDetailSerializer(user).data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class FarmerProfileViewSet(viewsets.ModelViewSet):

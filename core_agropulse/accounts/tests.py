@@ -225,6 +225,34 @@ class UserAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreater(len(response.data), 0)
 
+    def test_user_login(self):
+        """Test user login endpoint"""
+        # First register a user
+        self.client.post(self.register_url, self.user_data, format="json")
+
+        # Then login
+        login_url = "/api/users/login/"
+        login_data = {
+            "email": "testuser@example.com",
+            "password": "testpass123",
+        }
+        response = self.client.post(login_url, login_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
+        self.assertIn("user", response.data)
+        self.assertEqual(response.data["user"]["email"], "testuser@example.com")
+
+    def test_user_login_invalid_credentials(self):
+        """Test login with invalid credentials"""
+        login_url = "/api/users/login/"
+        login_data = {
+            "email": "nonexistent@example.com",
+            "password": "wrongpassword",
+        }
+        response = self.client.post(login_url, login_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class FarmerProfileAPITests(APITestCase):
     """Test cases for FarmerProfile API endpoints"""

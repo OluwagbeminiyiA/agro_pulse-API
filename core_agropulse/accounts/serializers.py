@@ -136,3 +136,19 @@ class EmailOTPRequestSerializer(serializers.Serializer):
 
 class EmailOtpVerifySerializer(serializers.Serializer):
     token = serializers.CharField(max_length=6)
+
+
+class LoginSerializer(serializers.Serializer):
+    """Serializer for user login"""
+
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        from django.contrib.auth import authenticate
+
+        user = authenticate(username=data["email"], password=data["password"])
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+        data["user"] = user
+        return data
