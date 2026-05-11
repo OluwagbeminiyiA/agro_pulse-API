@@ -8,9 +8,9 @@ repos:
     -   id: check-added-large-files
     -   id: check-ast            # Added: Validates Python syntax
     -   id: debug-statements     # Added: Catches forgotten breakpoints
-#    -   id: no-commit-to-branch
-#        name: "🌳 git · Protect main branches"
-#        args: [ "--branch", "main", "--branch", "master" ]
+    -   id: no-commit-to-branch
+        name: "🌳 git · Protect main branches"
+        args: [ "--branch", "main", "--branch", "master" ]
 
 -   repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0 # Updated

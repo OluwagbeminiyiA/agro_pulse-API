@@ -41,6 +41,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "corsheaders",
     # DRF apps
     "rest_framework",
     "rest_framework_simplejwt",
@@ -49,13 +50,14 @@ THIRD_PARTY_APPS = [
     "django_otp.plugins.otp_email",
 ]
 
-USER_DEFINED_APPS = []
+USER_DEFINED_APPS = ["core_agropulse.accounts.apps.AccountsConfig"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + USER_DEFINED_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -121,7 +123,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permission.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 SIMPLE_JWT = {
@@ -145,6 +147,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", cast=Csv())
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -158,6 +162,8 @@ OTP_EMAIL_BODY_TEMPLATE = "otp/email_body.txt"
 OTP_EMAIL_THROTTLE_FACTOR = config("OTP_EMAIL_THROTTLE_FACTOR")
 OTP_EMAIL_COOLDOWN_DURATION = config("OTP_EMAIL_COOLDOWN_DURATION")
 OTP_EMAIL_TOKEN_VALIDITY = config("OTP_EMAIL_TOKEN_VALIDITY")
+
+AUTH_USER_MODEL = "accounts.User"
 
 if find_spec("core_agropulse.agropulse.local_settings") is not None:
     from .local_settings import *  # noqa: F403, F405
