@@ -10,4 +10,5 @@ urlpatterns = [
     path("api/", include("core_agropulse.produce.urls")),
     path("api/", include("core_agropulse.orders.urls")),
     path("api/", include("core_agropulse.delivery.urls")),
+    path("api/", include("core_agropulse.payments.urls")),
 ]

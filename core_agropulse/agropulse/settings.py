@@ -57,6 +57,7 @@ USER_DEFINED_APPS = [
     "core_agropulse.produce.apps.ProduceConfig",
     "core_agropulse.orders.apps.OrdersConfig",
     "core_agropulse.delivery.apps.DeliveryConfig",
+    "core_agropulse.payments.apps.PaymentsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + USER_DEFINED_APPS
@@ -143,6 +144,15 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "UPDATE_LAST_LOGIN": True,
 }
+
+# Squad Payment Gateway Configuration
+SQUAD_SECRET_KEY = config("SQUAD_SECRET_KEY")
+SQUAD_PUBLIC_KEY = config("SQUAD_PUBLIC_KEY")
+SQUAD_MERCHANT_ID = config("SQUAD_MERCHANT_ID")
+SQUAD_BASE_URL = config("SQUAD_BASE_URL")
+SQUAD_PAYMENT_URL = config("SQUAD_PAYMENT_URL")
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
