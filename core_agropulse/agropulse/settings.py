@@ -15,6 +15,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from decouple import config, Csv
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,12 +46,17 @@ THIRD_PARTY_APPS = [
     # DRF apps
     "rest_framework",
     "rest_framework_simplejwt",
+    "django_filters",
     # OTP APPS
     "django_otp",
     "django_otp.plugins.otp_email",
 ]
 
-USER_DEFINED_APPS = ["core_agropulse.accounts.apps.AccountsConfig"]
+USER_DEFINED_APPS = [
+    "core_agropulse.accounts.apps.AccountsConfig",
+    "core_agropulse.produce.apps.ProduceConfig",
+    "core_agropulse.orders.apps.OrdersConfig",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + USER_DEFINED_APPS
 
@@ -124,6 +130,11 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ],
 }
 
 SIMPLE_JWT = {

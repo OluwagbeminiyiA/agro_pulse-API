@@ -377,3 +377,5 @@ cython_debug/
 !/core_agropulse/accounts/migrations/0001_initial.py
 !/core_agropulse/accounts/migrations/0002_alter_user_role.py
 !/core_agropulse/accounts/migrations/0003_rename_full_user_full_name.py
+!/core_agropulse/test_results.txt
+!/core_agropulse/test_output.txt
