@@ -1,13 +1,8 @@
-import requests
-import hashlib
-from decimal import Decimal
-from django.conf import settings
 from django.utils import timezone
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core_agropulse.payments.models import (
@@ -29,63 +24,9 @@ from core_agropulse.payments.serializers import (
     VirtualAccountDetailSerializer,
     VirtualAccountTransactionSerializer,
 )
+from core_agropulse.payments.services import SquadService, PaymentService
 from core_agropulse.orders.models import Order
 from core_agropulse.accounts.models import FarmerProfile, TransporterProfile
-
-
-class Squad:
-    """Squad payment gateway integration"""
-
-    # BASE_URL = "https://api.squadco.com"
-    BASE_URL = "https://sandbox-api-d.squadco.com"
-
-    def __init__(self):
-        self.api_key = settings.SQUAD_SECRET_KEY
-        self.merchant_id = settings.SQUAD_MERCHANT_ID
-        self.headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-        }
-
-    def initialize_payment(self, amount, order_id, email, full_name):
-        """Initialize payment with Squad"""
-        url = f"{self.BASE_URL}/transaction/Initiate"
-        payload = {
-            "email": email,
-            "amount": int(amount * 100),
-            "currency": "NGN",
-            "initiate_type": "inline",
-            "callback_url": "https://yourdomain.com/api/webhooks/squad/",
-            "payment_channels": ["card", "bank", "transfer", "ussd"],
-            "metadata": {"name": full_name, "order_id": order_id},
-            "pass_charge": False,
-        }
-
-        try:
-            response = requests.post(
-                url, json=payload, headers=self.headers, timeout=10
-            )
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            raise ValidationError(f"Squad payment initialization failed: {str(e)}")
-
-    def verify_payment(self, squad_transaction_id):
-        """Verify payment status with Squad"""
-        url = f"{self.BASE_URL}/transaction/verify/{squad_transaction_id}"
-
-        try:
-            response = requests.get(url, headers=self.headers, timeout=10)
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            raise ValidationError(f"Payment verification failed: {str(e)}")
-
-    def verify_webhook_signature(self, body, signature):
-        """Verify Squad webhook signature"""
-        hash_object = hashlib.sha512(body + self.api_key.encode())
-        computed_hash = hash_object.hexdigest()
-        return computed_hash == signature
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -166,28 +107,35 @@ class PaymentViewSet(viewsets.ModelViewSet):
         )
 
         # Initialize Squad payment
-        squad = Squad()
+        squad_service = SquadService()
         try:
-            squad_response = squad.initialize_payment(
-                order.total,
-                order.id,
-                order.buyer.user.email,
-                order.buyer.user.full_name,
+            squad_response = squad_service.initiate_payment(
+                email=order.buyer.user.email,
+                amount=int(order.total * 100),
+                currency="NGN",
+                transaction_ref=str(payment.id),
+                callback_url="https://yourdomain.com/api/webhooks/squad/",
+                metadata={
+                    "order_id": str(order.id),
+                    "name": order.buyer.user.full_name,
+                },
+                payment_channels=["card", "bank", "transfer", "ussd"],
             )
 
-            payment.squad_transaction_id = squad_response.get("transaction_reference")
+            payment.squad_transaction_id = squad_response.get("transaction_ref")
+            payment.checkout_url = squad_response.get("checkout_url")
             payment.save()
 
             return Response(
                 {
                     "payment_id": str(payment.id),
                     "squad_transaction_id": payment.squad_transaction_id,
-                    "authorization_url": squad_response.get("authorization_url"),
+                    "checkout_url": payment.checkout_url,
                     "amount": str(payment.amount),
                 },
                 status=status.HTTP_201_CREATED,
             )
-        except ValidationError as e:
+        except Exception as e:
             payment.delete()
             return Response(
                 {"error": str(e)},
@@ -205,9 +153,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        squad = Squad()
+        squad_service = SquadService()
         try:
-            squad_response = squad.verify_payment(payment.squad_transaction_id)
+            squad_response = squad_service.verify_payment(payment.squad_transaction_id)
 
             if squad_response.get("status") == "success":
                 payment.payment_status = "SUCCESS"
@@ -216,8 +164,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
                 # Create escrow and split if enabled
                 if payment.escrow_enabled:
-                    self._create_escrow(payment)
-                    self._create_payment_split(payment)
+                    PaymentService.create_escrow(payment)
+                    PaymentService.create_payment_split(payment)
 
                 serializer = self.get_serializer(payment)
                 return Response(serializer.data)
@@ -228,7 +176,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     {"error": "Payment verification failed"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except ValidationError as e:
+        except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -237,14 +185,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def webhook_callback(self, request):
         """Handle Squad webhook callback"""
-        squad = Squad()
+        squad_service = SquadService()
 
         # Get signature from headers
         signature = request.META.get("HTTP_X_SQUAD_SIGNATURE", "")
-        body = request.body
 
         # Verify webhook signature
-        if not squad.verify_webhook_signature(body, signature):
+        if not squad_service.verify_webhook_signature(request.data, signature):
             return Response(
                 {"error": "Invalid signature"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -266,15 +213,21 @@ class PaymentViewSet(viewsets.ModelViewSet):
             if status_value == "success":
                 payment.payment_status = "SUCCESS"
                 payment.payment_method = data.get("payment_method", "card")
+                payment.webhook_recieved = True
+                payment.webhook_verified = True
+                payment.webhook_payload = data
                 payment.save()
 
                 # Create escrow and split
                 if payment.escrow_enabled:
-                    self._create_escrow(payment)
-                    self._create_payment_split(payment)
+                    PaymentService.create_escrow(payment)
+                    PaymentService.create_payment_split(payment)
 
             elif status_value == "failed":
                 payment.payment_status = "FAILED"
+                payment.webhook_recieved = True
+                payment.webhook_verified = True
+                payment.webhook_payload = data
                 payment.save()
 
             return Response({"status": "received"})
@@ -283,34 +236,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-    def _create_escrow(self, payment):
-        """Create escrow account for payment"""
-        if hasattr(payment, "escrow"):
-            return
-
-        EscrowAccount.objects.create(
-            payment=payment,
-            farmer=payment.order.farmer,
-            amount_held=payment.amount,
-        )
-
-    def _create_payment_split(self, payment):
-        """Create payment split for farmer, rider, and platform"""
-        if hasattr(payment, "split"):
-            return
-
-        # Calculate split: 80% farmer, 10% rider, 10% platform
-        farmer_amount = payment.amount * Decimal("0.80")
-        rider_amount = payment.amount * Decimal("0.10")
-        platform_fee = payment.amount * Decimal("0.10")
-
-        PaymentSplit.objects.create(
-            payment=payment,
-            farmer_amount=farmer_amount,
-            rider_amount=rider_amount,
-            platform_fee=platform_fee,
-        )
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def pending_payments(self, request):

@@ -253,3 +253,43 @@ class SquadService:
 
         # Compare signatures
         return hmac.compare_digest(computed_signature, signature.upper())
+
+
+class PaymentService:
+    """Service for handling payment business logic"""
+
+    @staticmethod
+    def create_escrow(payment):
+        """Create escrow account for payment"""
+        from core_agropulse.payments.models import EscrowAccount
+
+        if hasattr(payment, "escrow"):
+            return
+
+        EscrowAccount.objects.create(
+            payment=payment,
+            farmer=payment.order.farmer,
+            amount_held=payment.amount,
+        )
+
+    @staticmethod
+    def create_payment_split(payment):
+        """Create payment split for farmer, rider, and platform"""
+        from decimal import Decimal
+
+        from core_agropulse.payments.models import PaymentSplit
+
+        if hasattr(payment, "split"):
+            return
+
+        # Calculate split: 80% farmer, 10% rider, 10% platform
+        farmer_amount = payment.amount * Decimal("0.80")
+        rider_amount = payment.amount * Decimal("0.10")
+        platform_fee = payment.amount * Decimal("0.10")
+
+        PaymentSplit.objects.create(
+            payment=payment,
+            farmer_amount=farmer_amount,
+            rider_amount=rider_amount,
+            platform_fee=platform_fee,
+        )
