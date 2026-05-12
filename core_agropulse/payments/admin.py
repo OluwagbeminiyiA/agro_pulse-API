@@ -1,5 +1,12 @@
 from django.contrib import admin
-from core_agropulse.payments.models import Payment, EscrowAccount, PaymentSplit, Payout
+from core_agropulse.payments.models import (
+    Payment,
+    EscrowAccount,
+    PaymentSplit,
+    Payout,
+    VirtualAccount,
+    VirtualAccountTransaction,
+)
 
 
 @admin.register(Payment)
@@ -95,4 +102,87 @@ class PayoutAdmin(admin.ModelAdmin):
         ("Recipient", {"fields": ("farmer", "rider")}),
         ("Status", {"fields": ("payout_status", "completed_at", "bank_reference")}),
         ("Timestamps", {"fields": ("created_at", "updated_at")}),
+    )
+
+
+@admin.register(VirtualAccount)
+class VirtualAccountAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "virtual_account_number",
+        "account_name",
+        "bank_name",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ("is_active", "bank_name", "created_at")
+    search_fields = (
+        "virtual_account_number",
+        "account_name",
+        "email",
+        "farmer__user__full_name",
+        "transporter__user__full_name",
+    )
+    readonly_fields = ("id", "created_at", "updated_at")
+    fieldsets = (
+        (
+            "Account Information",
+            {"fields": ("id", "virtual_account_number", "bank_name")},
+        ),
+        ("Owner", {"fields": ("farmer", "transporter")}),
+        (
+            "Account Holder Details",
+            {
+                "fields": (
+                    "account_name",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "mobile_num",
+                    "bvn",
+                )
+            },
+        ),
+        ("Status", {"fields": ("is_active",)}),
+        ("Timestamps", {"fields": ("created_at", "updated_at")}),
+    )
+
+
+@admin.register(VirtualAccountTransaction)
+class VirtualAccountTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "transaction_reference",
+        "virtual_account",
+        "pricipal_amount",
+        "settled_amount",
+        "webhook_processed",
+        "created_at",
+    )
+    list_filter = ("webhook_processed", "transaction_date", "currency", "created_at")
+    search_fields = (
+        "transaction_reference",
+        "virtual_account__virtual_account_number",
+        "sender",
+    )
+    readonly_fields = ("id", "created_at")
+    fieldsets = (
+        (
+            "Transaction Information",
+            {
+                "fields": (
+                    "id",
+                    "transaction_reference",
+                    "virtual_account",
+                    "sender",
+                )
+            },
+        ),
+        (
+            "Amounts",
+            {"fields": ("pricipal_amount", "settled_amount", "fee", "currency")},
+        ),
+        ("Details", {"fields": ("remarks", "transaction_date")}),
+        ("Webhook", {"fields": ("webhook_processed", "webhook_payload")}),
+        ("Timestamp", {"fields": ("created_at",)}),
     )

@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from core_agropulse.payments.models import Payment, EscrowAccount, PaymentSplit, Payout
+from core_agropulse.payments.models import (
+    Payment,
+    EscrowAccount,
+    PaymentSplit,
+    Payout,
+    VirtualAccount,
+    VirtualAccountTransaction,
+)
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -18,16 +25,22 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = [
             "id",
+            "buyer",
             "order",
             "order_id",
             "buyer_name",
             "farmer_name",
             "order_total",
+            "email",
             "squad_transaction_id",
             "payment_method",
             "payment_status",
             "amount",
+            "currency",
+            "channel",
             "escrow_enabled",
+            "webhook_recieved",
+            "webhook_verified",
             "created_at",
             "updated_at",
         ]
@@ -213,3 +226,123 @@ class PayoutDetailSerializer(serializers.ModelSerializer):
             "amount": str(obj.payment.amount),
             "status": obj.payment.payment_status,
         }
+
+
+class VirtualAccountSerializer(serializers.ModelSerializer):
+    farmer_name = serializers.CharField(
+        source="farmer.user.full_name", read_only=True, allow_null=True
+    )
+    transporter_name = serializers.CharField(
+        source="transporter.user.full_name", read_only=True, allow_null=True
+    )
+
+    class Meta:
+        model = VirtualAccount
+        fields = [
+            "id",
+            "transporter",
+            "transporter_name",
+            "farmer",
+            "farmer_name",
+            "virtual_account_number",
+            "bank_name",
+            "account_name",
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_num",
+            "bvn",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class VirtualAccountDetailSerializer(serializers.ModelSerializer):
+    farmer_details = serializers.SerializerMethodField(read_only=True)
+    transporter_details = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = VirtualAccount
+        fields = [
+            "id",
+            "transporter",
+            "transporter_details",
+            "farmer",
+            "farmer_details",
+            "virtual_account_number",
+            "bank_name",
+            "account_name",
+            "first_name",
+            "last_name",
+            "email",
+            "mobile_num",
+            "bvn",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_farmer_details(self, obj):
+        if obj.farmer:
+            return {
+                "id": str(obj.farmer.id),
+                "name": obj.farmer.user.full_name,
+                "email": obj.farmer.user.email,
+                "farm_name": obj.farmer.farm_name,
+            }
+        return None
+
+    def get_transporter_details(self, obj):
+        if obj.transporter:
+            return {
+                "id": str(obj.transporter.id),
+                "name": obj.transporter.user.full_name,
+                "email": obj.transporter.user.email,
+                "vehicle_type": obj.transporter.vehicle_type,
+            }
+        return None
+
+
+class VirtualAccountTransactionSerializer(serializers.ModelSerializer):
+    virtual_account_number = serializers.CharField(
+        source="virtual_account.virtual_account_number", read_only=True
+    )
+    account_owner = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = VirtualAccountTransaction
+        fields = [
+            "id",
+            "virtual_account",
+            "virtual_account_number",
+            "account_owner",
+            "transaction_reference",
+            "pricipal_amount",
+            "settled_amount",
+            "fee",
+            "sender",
+            "remarks",
+            "currency",
+            "transaction_date",
+            "webhook_processed",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+    def get_account_owner(self, obj):
+        if obj.virtual_account.farmer:
+            return {
+                "type": "farmer",
+                "name": obj.virtual_account.farmer.user.full_name,
+                "farm_name": obj.virtual_account.farmer.farm_name,
+            }
+        elif obj.virtual_account.transporter:
+            return {
+                "type": "transporter",
+                "name": obj.virtual_account.transporter.user.full_name,
+                "vehicle_type": obj.virtual_account.transporter.vehicle_type,
+            }
+        return None

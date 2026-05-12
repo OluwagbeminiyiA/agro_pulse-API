@@ -10,7 +10,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
 
-from core_agropulse.payments.models import Payment, EscrowAccount, PaymentSplit, Payout
+from core_agropulse.payments.models import (
+    Payment,
+    EscrowAccount,
+    PaymentSplit,
+    Payout,
+    VirtualAccount,
+    VirtualAccountTransaction,
+)
 from core_agropulse.payments.serializers import (
     PaymentSerializer,
     PaymentDetailSerializer,
@@ -18,6 +25,9 @@ from core_agropulse.payments.serializers import (
     PaymentSplitSerializer,
     PayoutSerializer,
     PayoutDetailSerializer,
+    VirtualAccountSerializer,
+    VirtualAccountDetailSerializer,
+    VirtualAccountTransactionSerializer,
 )
 from core_agropulse.orders.models import Order
 from core_agropulse.accounts.models import FarmerProfile, TransporterProfile
@@ -145,11 +155,14 @@ class PaymentViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Create payment record
+        # Create payment record with buyer and email fields
         payment = Payment.objects.create(
             order=order,
+            buyer=order.buyer,
+            email=order.buyer.user.email,
             amount=order.total,
             escrow_enabled=True,
+            currency="NGN",
         )
 
         # Initialize Squad payment
@@ -575,4 +588,153 @@ class PayoutViewSet(viewsets.ModelViewSet):
             pass
 
         serializer = self.get_serializer(payouts, many=True)
+        return Response(serializer.data)
+
+
+class VirtualAccountViewSet(viewsets.ModelViewSet):
+    """Viewset for managing virtual accounts"""
+
+    queryset = VirtualAccount.objects.all()
+    serializer_class = VirtualAccountSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["is_active", "bank_name"]
+    ordering_fields = ["created_at"]
+    ordering = ["-created_at"]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return VirtualAccountDetailSerializer
+        return VirtualAccountSerializer
+
+    def get_queryset(self):
+        """Filter virtual accounts based on user role"""
+        user = self.request.user
+        queryset = VirtualAccount.objects.all()
+
+        if user.is_staff:
+            return queryset
+
+        try:
+            farmer = FarmerProfile.objects.get(user=user)
+            return queryset.filter(farmer=farmer)
+        except:
+            pass
+
+        try:
+            transporter = TransporterProfile.objects.get(user=user)
+            return queryset.filter(transporter=transporter)
+        except:
+            pass
+
+        return VirtualAccount.objects.none()
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def my_accounts(self, request):
+        """Get current user's virtual accounts"""
+        user = request.user
+        accounts = []
+
+        try:
+            farmer = FarmerProfile.objects.get(user=user)
+            accounts = VirtualAccount.objects.filter(farmer=farmer)
+        except:
+            pass
+
+        try:
+            transporter = TransporterProfile.objects.get(user=user)
+            accounts = list(accounts) + list(
+                VirtualAccount.objects.filter(transporter=transporter)
+            )
+        except:
+            pass
+
+        serializer = self.get_serializer(accounts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def active_accounts(self, request):
+        """Get all active virtual accounts"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Only admins can view all accounts"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        accounts = VirtualAccount.objects.filter(is_active=True)
+        serializer = self.get_serializer(accounts, many=True)
+        return Response(serializer.data)
+
+
+class VirtualAccountTransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read-only viewset for virtual account transactions"""
+
+    queryset = VirtualAccountTransaction.objects.all()
+    serializer_class = VirtualAccountTransactionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["virtual_account", "webhook_processed"]
+    ordering_fields = ["transaction_date", "created_at"]
+    ordering = ["-transaction_date"]
+
+    def get_queryset(self):
+        """Filter transactions based on user role"""
+        user = self.request.user
+        queryset = VirtualAccountTransaction.objects.all()
+
+        if user.is_staff:
+            return queryset
+
+        try:
+            farmer = FarmerProfile.objects.get(user=user)
+            return queryset.filter(virtual_account__farmer=farmer)
+        except:
+            pass
+
+        try:
+            transporter = TransporterProfile.objects.get(user=user)
+            return queryset.filter(virtual_account__transporter=transporter)
+        except:
+            pass
+
+        return VirtualAccountTransaction.objects.none()
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def my_transactions(self, request):
+        """Get current user's virtual account transactions"""
+        user = request.user
+        transactions = []
+
+        try:
+            farmer = FarmerProfile.objects.get(user=user)
+            transactions = VirtualAccountTransaction.objects.filter(
+                virtual_account__farmer=farmer
+            )
+        except:
+            pass
+
+        try:
+            transporter = TransporterProfile.objects.get(user=user)
+            transactions = list(transactions) + list(
+                VirtualAccountTransaction.objects.filter(
+                    virtual_account__transporter=transporter
+                )
+            )
+        except:
+            pass
+
+        serializer = self.get_serializer(transactions, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def pending_webhooks(self, request):
+        """Get transactions with unprocessed webhooks"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Only admins can view pending webhooks"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        transactions = VirtualAccountTransaction.objects.filter(webhook_processed=False)
+        serializer = self.get_serializer(transactions, many=True)
         return Response(serializer.data)

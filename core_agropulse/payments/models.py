@@ -34,16 +34,26 @@ CHANNEL_CHOICES = [
     ("VIRTUAL-ACCOUNT", "virtual-account"),
 ]
 
+STATUS_CHOICES = [
+    ("pending", "Pending"),
+    ("success", "Success"),
+    ("failed", "Failed"),
+]
+
 
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     buyer = models.ForeignKey(
-        BuyerProfile, on_delete=models.CASCADE, related_name="payments"
+        BuyerProfile,
+        on_delete=models.CASCADE,
+        related_name="payments",
+        null=True,
+        blank=True,
     )
     order = models.OneToOneField(
         Order, on_delete=models.CASCADE, related_name="payment"
     )
-    email = models.EmailField()
+    email = models.EmailField(null=True, blank=True)
     squad_transaction_id = models.CharField(max_length=255, null=True, blank=True)
     payment_method = models.CharField(max_length=100, default="card")
     payment_status = models.CharField(
@@ -268,3 +278,50 @@ class Payout(models.Model):
     def __str__(self):
         recipient = self.farmer or self.rider
         return f"Payout {self.id} - {recipient} (${self.amount})"
+
+    class Transfer(models.Model):
+        farmer = models.ForeignKey(
+            FarmerProfile, on_delete=models.CASCADE, related_name="transfers"
+        )
+        transporter = models.ForeignKey(
+            TransporterProfile, on_delete=models.CASCADE, related_name="transfers"
+        )
+        transaction_reference = models.CharField(
+            max_length=255, unique=True, db_index=True
+        )
+        amount = models.DecimalField(max_digits=12, decimal_places=2)
+        bank_code = models.CharField(max_length=10)
+        account_number = models.CharField(max_length=20)
+        account_name = models.CharField(max_length=255)
+        remark = models.TextField(blank=True)
+        status = models.CharField(
+            max_length=20, choices=STATUS_CHOICES, default="pending"
+        )
+
+        squad_response = models.JSONField(default=dict, blank=True)
+        error_message = models.TextField(blank=True, null=True)
+
+        created_at = models.DateTimeField(auto_now_add=True)
+        updated_at = models.DateTimeField(auto_now=True)
+
+        class Meta:
+            ordering = ["-created_at"]
+
+        def clean(self):
+            if self.farmer and self.transporter:
+                raise ValidationError("You can only select one account")
+            if not self.farmer and not self.transporter:
+                raise ValidationError(
+                    "The transfer must belong to either a farmer or a transporter"
+                )
+
+        def save(self, *args, **kwargs):
+            self.full_clean()
+            super().save(*args, **kwargs)
+
+        @property
+        def owner(self):
+            return self.farmer or self.transporter
+
+        def __str__(self):
+            return f"{self.transaction_reference} - {self.status}"
