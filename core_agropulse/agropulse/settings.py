@@ -58,6 +58,7 @@ USER_DEFINED_APPS = [
     "core_agropulse.orders.apps.OrdersConfig",
     "core_agropulse.delivery.apps.DeliveryConfig",
     "core_agropulse.payments.apps.PaymentsConfig",
+    "core_agropulse.subscriptions.apps.SubscriptionsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + USER_DEFINED_APPS
