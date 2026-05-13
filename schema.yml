@@ -1,0 +1,6162 @@
+openapi: 3.0.3
+info:
+  title: AgroPulse API
+  version: 1.0.0
+  description: Agropulse is an AI-powered agricultural commerce platform for farmers,
+    buyers, riders, and operations teams. The project is built with Django and Django
+    REST Framework and currently covers user management, produce management, orders,
+    delivery, payments, and recurring subscriptions.
+paths:
+  /api/buyers/:
+    get:
+      operationId: buyers_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - buyers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BuyerProfile'
+          description: ''
+    post:
+      operationId: buyers_create
+      tags:
+      - buyers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerProfile'
+          description: ''
+  /api/buyers/{id}/:
+    get:
+      operationId: buyers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this buyer profile.
+        required: true
+      tags:
+      - buyers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerProfile'
+          description: ''
+    put:
+      operationId: buyers_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this buyer profile.
+        required: true
+      tags:
+      - buyers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuyerProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerProfile'
+          description: ''
+    patch:
+      operationId: buyers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this buyer profile.
+        required: true
+      tags:
+      - buyers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerProfile'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerProfile'
+          description: ''
+    delete:
+      operationId: buyers_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this buyer profile.
+        required: true
+      tags:
+      - buyers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/deliveries/:
+    get:
+      operationId: deliveries_list
+      parameters:
+      - in: query
+        name: delivery_status
+        schema:
+          type: string
+          enum:
+          - DELIVERED
+          - IN_TRANSIT
+          - PENDING
+          - PICKED_UP
+        description: |-
+          * `PENDING` - Pending
+          * `PICKED_UP` - Picked Up
+          * `IN_TRANSIT` - In Transit
+          * `DELIVERED` - Delivered
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: transporter
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Delivery'
+          description: ''
+    post:
+      operationId: deliveries_create
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/{id}/:
+    get:
+      operationId: deliveries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryDetail'
+          description: ''
+    put:
+      operationId: deliveries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+    patch:
+      operationId: deliveries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDelivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDelivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDelivery'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+    delete:
+      operationId: deliveries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/deliveries/{id}/assign_rider/:
+    post:
+      operationId: deliveries_assign_rider_create
+      description: Assign a rider to a delivery
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/{id}/delivery_confirmation/:
+    post:
+      operationId: deliveries_delivery_confirmation_create
+      description: Confirm delivery completion and update order status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/{id}/pickup_confirmation/:
+    post:
+      operationId: deliveries_pickup_confirmation_create
+      description: Confirm that rider has picked up the delivery
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/{id}/start_transit/:
+    post:
+      operationId: deliveries_start_transit_create
+      description: Mark delivery as in transit
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this delivery.
+        required: true
+      tags:
+      - deliveries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Delivery'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/available_riders/:
+    get:
+      operationId: deliveries_available_riders_retrieve
+      description: Get available transporters for pickup
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/by_status/:
+    get:
+      operationId: deliveries_by_status_retrieve
+      description: Get deliveries by status
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/my_deliveries/:
+    get:
+      operationId: deliveries_my_deliveries_retrieve
+      description: Get all deliveries for current transporter
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/deliveries/pending_deliveries/:
+    get:
+      operationId: deliveries_pending_deliveries_retrieve
+      description: Get all pending deliveries
+      tags:
+      - deliveries
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/escrow/:
+    get:
+      operationId: escrow_list
+      description: Read-only viewset for escrow accounts
+      parameters:
+      - in: query
+        name: farmer
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: release_status
+        schema:
+          type: string
+          enum:
+          - DISPUTED
+          - HELD
+          - RELEASED
+        description: |-
+          * `HELD` - Held
+          * `RELEASED` - Released
+          * `DISPUTED` - Disputed
+      tags:
+      - escrow
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EscrowAccount'
+          description: ''
+  /api/escrow/{id}/:
+    get:
+      operationId: escrow_retrieve
+      description: Read-only viewset for escrow accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this escrow account.
+        required: true
+      tags:
+      - escrow
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EscrowAccount'
+          description: ''
+  /api/escrow/{id}/release_funds/:
+    post:
+      operationId: escrow_release_funds_create
+      description: Release escrowed funds after delivery confirmation
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this escrow account.
+        required: true
+      tags:
+      - escrow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EscrowAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EscrowAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EscrowAccount'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EscrowAccount'
+          description: ''
+  /api/escrow/held_funds/:
+    get:
+      operationId: escrow_held_funds_retrieve
+      description: Get all held escrowed funds
+      tags:
+      - escrow
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EscrowAccount'
+          description: ''
+  /api/farmers/:
+    get:
+      operationId: farmers_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - farmers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FarmerProfile'
+          description: ''
+    post:
+      operationId: farmers_create
+      tags:
+      - farmers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmerProfile'
+          description: ''
+  /api/farmers/{id}/:
+    get:
+      operationId: farmers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this farmer profile.
+        required: true
+      tags:
+      - farmers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmerProfile'
+          description: ''
+    put:
+      operationId: farmers_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this farmer profile.
+        required: true
+      tags:
+      - farmers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FarmerProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmerProfile'
+          description: ''
+    patch:
+      operationId: farmers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this farmer profile.
+        required: true
+      tags:
+      - farmers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFarmerProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFarmerProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFarmerProfile'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmerProfile'
+          description: ''
+    delete:
+      operationId: farmers_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this farmer profile.
+        required: true
+      tags:
+      - farmers
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/order-items/:
+    get:
+      operationId: order_items_list
+      parameters:
+      - in: query
+        name: order
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: produce
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - order-items
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderItem'
+          description: ''
+    post:
+      operationId: order_items_create
+      tags:
+      - order-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItem'
+          description: ''
+  /api/order-items/{id}/:
+    get:
+      operationId: order_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order item.
+        required: true
+      tags:
+      - order-items
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItem'
+          description: ''
+    put:
+      operationId: order_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order item.
+        required: true
+      tags:
+      - order-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderItem'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItem'
+          description: ''
+    patch:
+      operationId: order_items_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order item.
+        required: true
+      tags:
+      - order-items
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrderItem'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItem'
+          description: ''
+    delete:
+      operationId: order_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order item.
+        required: true
+      tags:
+      - order-items
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/order-items/by_order/:
+    get:
+      operationId: order_items_by_order_retrieve
+      description: Get all items for a specific order
+      tags:
+      - order-items
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderItem'
+          description: ''
+  /api/orders/:
+    get:
+      operationId: orders_list
+      parameters:
+      - in: query
+        name: buyer
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: delivery_type
+        schema:
+          type: string
+          enum:
+          - DELIVERY
+          - PICKUP
+        description: |-
+          * `PICKUP` - Pickup
+          * `DELIVERY` - Delivery
+      - in: query
+        name: farmer
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: order_status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - COMPLETED
+          - IN_TRANSIT
+          - PAID
+          - PENDING
+          - PROCESSING
+        description: |-
+          * `PENDING` - Pending
+          * `PAID` - Paid
+          * `PROCESSING` - Processing
+          * `IN_TRANSIT` - In Transit
+          * `COMPLETED` - Completed
+          * `CANCELLED` - Cancelled
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+          description: ''
+    post:
+      operationId: orders_create
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/{id}/:
+    get:
+      operationId: orders_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order.
+        required: true
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailWithItems'
+          description: ''
+    put:
+      operationId: orders_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order.
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Order'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+    patch:
+      operationId: orders_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order.
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+    delete:
+      operationId: orders_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order.
+        required: true
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/orders/{id}/update_status/:
+    patch:
+      operationId: orders_update_status_partial_update
+      description: Update order status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this order.
+        required: true
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrder'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/by_status/:
+    get:
+      operationId: orders_by_status_retrieve
+      description: Get orders by status
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/my_orders/:
+    get:
+      operationId: orders_my_orders_retrieve
+      description: Get all orders for the current user (buyer or farmer)
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/orders/pending_orders/:
+    get:
+      operationId: orders_pending_orders_retrieve
+      description: Get all pending orders
+      tags:
+      - orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/payment-splits/:
+    get:
+      operationId: payment_splits_list
+      description: Read-only viewset for payment splits
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - payment-splits
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentSplit'
+          description: ''
+  /api/payment-splits/{id}/:
+    get:
+      operationId: payment_splits_retrieve
+      description: Read-only viewset for payment splits
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment split.
+        required: true
+      tags:
+      - payment-splits
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentSplit'
+          description: ''
+  /api/payments/:
+    get:
+      operationId: payments_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: payment_status
+        schema:
+          type: string
+          enum:
+          - FAILED
+          - PENDING
+          - REFUNDED
+          - SUCCESS
+        description: |-
+          * `PENDING` - Pending
+          * `SUCCESS` - Success
+          * `FAILED` - Failed
+          * `REFUNDED` - Refunded
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+          description: ''
+    post:
+      operationId: payments_create
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/{id}/:
+    get:
+      operationId: payments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDetail'
+          description: ''
+    put:
+      operationId: payments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment.
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    patch:
+      operationId: payments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment.
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPayment'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+    delete:
+      operationId: payments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment.
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/payments/{id}/verify_payment/:
+    post:
+      operationId: payments_verify_payment_create
+      description: Verify and confirm payment
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payment.
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/initialize_payment/:
+    post:
+      operationId: payments_initialize_payment_create
+      description: Initialize payment for an order
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/my_payments/:
+    get:
+      operationId: payments_my_payments_retrieve
+      description: Get current user's payments
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/pending_payments/:
+    get:
+      operationId: payments_pending_payments_retrieve
+      description: Get pending payments
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payments/webhook_callback/:
+    post:
+      operationId: payments_webhook_callback_create
+      description: Handle Squad webhook callback
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payment'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+          description: ''
+  /api/payouts/:
+    get:
+      operationId: payouts_list
+      description: Viewset for managing payouts
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: payout_status
+        schema:
+          type: string
+          enum:
+          - COMPLETED
+          - FAILED
+          - PENDING
+          - PROCESSING
+        description: |-
+          * `PENDING` - Pending
+          * `PROCESSING` - Processing
+          * `COMPLETED` - Completed
+          * `FAILED` - Failed
+      - in: query
+        name: payout_type
+        schema:
+          type: string
+          enum:
+          - FARMER
+          - RIDER
+        description: |-
+          * `FARMER` - Farmer
+          * `RIDER` - Rider
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payout'
+          description: ''
+    post:
+      operationId: payouts_create
+      description: Viewset for managing payouts
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payout'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/{id}/:
+    get:
+      operationId: payouts_retrieve
+      description: Viewset for managing payouts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payout.
+        required: true
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PayoutDetail'
+          description: ''
+    put:
+      operationId: payouts_update
+      description: Viewset for managing payouts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payout.
+        required: true
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payout'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+    patch:
+      operationId: payouts_partial_update
+      description: Viewset for managing payouts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payout.
+        required: true
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPayout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPayout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPayout'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+    delete:
+      operationId: payouts_destroy
+      description: Viewset for managing payouts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payout.
+        required: true
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/payouts/{id}/mark_completed/:
+    post:
+      operationId: payouts_mark_completed_create
+      description: Mark payout as completed
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this payout.
+        required: true
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payout'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/my_payouts/:
+    get:
+      operationId: payouts_my_payouts_retrieve
+      description: Get current user's payouts
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/pending_farmer_payouts/:
+    get:
+      operationId: payouts_pending_farmer_payouts_retrieve
+      description: Get pending farmer payouts
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/pending_rider_payouts/:
+    get:
+      operationId: payouts_pending_rider_payouts_retrieve
+      description: Get pending rider payouts
+      tags:
+      - payouts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/process_farmer_payouts/:
+    post:
+      operationId: payouts_process_farmer_payouts_create
+      description: Process all pending farmer payouts
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payout'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/payouts/process_rider_payouts/:
+    post:
+      operationId: payouts_process_rider_payouts_create
+      description: Process all pending rider payouts
+      tags:
+      - payouts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Payout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Payout'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+          description: ''
+  /api/produces/:
+    get:
+      operationId: produces_list
+      parameters:
+      - in: query
+        name: availability_status
+        schema:
+          type: string
+          enum:
+          - AVAILABLE
+          - LOW_STOCK
+          - SOLD_OUT
+        description: |-
+          * `AVAILABLE` - Available
+          * `LOW_STOCK` - Low Stock
+          * `SOLD_OUT` - Sold Out
+      - in: query
+        name: category
+        schema:
+          type: string
+          enum:
+          - DAIRY
+          - FRUITS
+          - GRAINS
+          - MEAT
+          - OTHER
+          - VEGETABLES
+        description: |-
+          * `VEGETABLES` - Vegetables
+          * `FRUITS` - Fruits
+          * `GRAINS` - Grains
+          * `DAIRY` - Dairy
+          * `MEAT` - Meat
+          * `OTHER` - Other
+      - in: query
+        name: farmer
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Produce'
+          description: ''
+    post:
+      operationId: produces_create
+      tags:
+      - produces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Produce'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Produce'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Produce'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+  /api/produces/{id}/:
+    get:
+      operationId: produces_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this produce.
+        required: true
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProduceDetail'
+          description: ''
+    put:
+      operationId: produces_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this produce.
+        required: true
+      tags:
+      - produces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Produce'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Produce'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Produce'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+    patch:
+      operationId: produces_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this produce.
+        required: true
+      tags:
+      - produces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+    delete:
+      operationId: produces_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this produce.
+        required: true
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/produces/{id}/update_stock/:
+    patch:
+      operationId: produces_update_stock_partial_update
+      description: Update quantity available for a produce
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this produce.
+        required: true
+      tags:
+      - produces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProduce'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+  /api/produces/available/:
+    get:
+      operationId: produces_available_retrieve
+      description: Get all available produces
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+  /api/produces/by_category/:
+    get:
+      operationId: produces_by_category_retrieve
+      description: Get produces by category
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+  /api/produces/my_produces/:
+    get:
+      operationId: produces_my_produces_retrieve
+      description: Get all produces by the current user (farmer)
+      tags:
+      - produces
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produce'
+          description: ''
+  /api/rider-earnings/:
+    get:
+      operationId: rider_earnings_list
+      description: Read-only viewset for rider earnings tracking
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: payment_status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - PAID
+          - PENDING
+        description: |-
+          * `PENDING` - Pending
+          * `PAID` - Paid
+          * `CANCELLED` - Cancelled
+      - in: query
+        name: transporter
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - rider-earnings
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RiderEarnings'
+          description: ''
+  /api/rider-earnings/{id}/:
+    get:
+      operationId: rider_earnings_retrieve
+      description: Read-only viewset for rider earnings tracking
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rider earnings.
+        required: true
+      tags:
+      - rider-earnings
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiderEarningsDetail'
+          description: ''
+  /api/rider-earnings/{id}/mark_as_paid/:
+    post:
+      operationId: rider_earnings_mark_as_paid_create
+      description: Mark earnings as paid
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this rider earnings.
+        required: true
+      tags:
+      - rider-earnings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiderEarnings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RiderEarnings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RiderEarnings'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiderEarnings'
+          description: ''
+  /api/rider-earnings/my_earnings/:
+    get:
+      operationId: rider_earnings_my_earnings_retrieve
+      description: Get earnings summary for current transporter
+      tags:
+      - rider-earnings
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiderEarnings'
+          description: ''
+  /api/rider-earnings/pending_payments/:
+    get:
+      operationId: rider_earnings_pending_payments_retrieve
+      description: Get all pending payments to riders
+      tags:
+      - rider-earnings
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiderEarnings'
+          description: ''
+  /api/subscription-orders/:
+    get:
+      operationId: subscription_orders_list
+      description: Read-only viewset for subscription orders
+      parameters:
+      - in: query
+        name: order_status
+        schema:
+          type: string
+          enum:
+          - CONFIRMED
+          - DELIVERED
+          - FAILED
+          - PENDING
+          - SKIPPED
+        description: |-
+          * `PENDING` - Pending
+          * `CONFIRMED` - Confirmed
+          * `DELIVERED` - Delivered
+          * `FAILED` - Failed
+          * `SKIPPED` - Skipped
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: subscription
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - subscription-orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionOrder'
+          description: ''
+  /api/subscription-orders/{id}/:
+    get:
+      operationId: subscription_orders_retrieve
+      description: Read-only viewset for subscription orders
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription order.
+        required: true
+      tags:
+      - subscription-orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionOrderDetail'
+          description: ''
+  /api/subscription-orders/due_orders/:
+    get:
+      operationId: subscription_orders_due_orders_retrieve
+      description: Get subscription orders due today or earlier
+      tags:
+      - subscription-orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionOrder'
+          description: ''
+  /api/subscription-orders/pending_orders/:
+    get:
+      operationId: subscription_orders_pending_orders_retrieve
+      description: Get pending subscription orders
+      tags:
+      - subscription-orders
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionOrder'
+          description: ''
+  /api/subscription-payments/:
+    get:
+      operationId: subscription_payments_list
+      description: Read-only viewset for subscription payments
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: payment_status
+        schema:
+          type: string
+          enum:
+          - COMPLETED
+          - FAILED
+          - PENDING
+          - REFUNDED
+        description: |-
+          * `PENDING` - Pending
+          * `COMPLETED` - Completed
+          * `FAILED` - Failed
+          * `REFUNDED` - Refunded
+      tags:
+      - subscription-payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionPayment'
+          description: ''
+  /api/subscription-payments/{id}/:
+    get:
+      operationId: subscription_payments_retrieve
+      description: Read-only viewset for subscription payments
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription payment.
+        required: true
+      tags:
+      - subscription-payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPayment'
+          description: ''
+  /api/subscription-payments/pending_payments/:
+    get:
+      operationId: subscription_payments_pending_payments_retrieve
+      description: Get pending subscription payments
+      tags:
+      - subscription-payments
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPayment'
+          description: ''
+  /api/subscriptions/:
+    get:
+      operationId: subscriptions_list
+      description: ViewSet for managing subscriptions
+      parameters:
+      - in: query
+        name: active
+        schema:
+          type: boolean
+      - in: query
+        name: frequency
+        schema:
+          type: string
+          enum:
+          - DAILY
+          - MONTHLY
+          - WEEKLY
+        description: |-
+          * `DAILY` - Daily
+          * `WEEKLY` - Weekly
+          * `MONTHLY` - Monthly
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - CANCELLED
+          - PAUSED
+        description: |-
+          * `ACTIVE` - Active
+          * `PAUSED` - Paused
+          * `CANCELLED` - Cancelled
+      tags:
+      - subscriptions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+          description: ''
+    post:
+      operationId: subscriptions_create
+      description: ViewSet for managing subscriptions
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/{id}/:
+    get:
+      operationId: subscriptions_retrieve
+      description: ViewSet for managing subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDetail'
+          description: ''
+    put:
+      operationId: subscriptions_update
+      description: ViewSet for managing subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    patch:
+      operationId: subscriptions_partial_update
+      description: ViewSet for managing subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    delete:
+      operationId: subscriptions_destroy
+      description: ViewSet for managing subscriptions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/subscriptions/{id}/cancel/:
+    post:
+      operationId: subscriptions_cancel_create
+      description: Cancel a subscription
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/{id}/pause/:
+    post:
+      operationId: subscriptions_pause_create
+      description: Pause a subscription
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/{id}/resume/:
+    post:
+      operationId: subscriptions_resume_create
+      description: Resume a paused subscription
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscription.
+        required: true
+      tags:
+      - subscriptions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/active_subscriptions/:
+    get:
+      operationId: subscriptions_active_subscriptions_retrieve
+      description: Get all active subscriptions
+      tags:
+      - subscriptions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/subscriptions/my_subscriptions/:
+    get:
+      operationId: subscriptions_my_subscriptions_retrieve
+      description: Get current user's subscriptions
+      tags:
+      - subscriptions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/transporters/:
+    get:
+      operationId: transporters_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - transporters
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransporterProfile'
+          description: ''
+    post:
+      operationId: transporters_create
+      tags:
+      - transporters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransporterProfile'
+          description: ''
+  /api/transporters/{id}/:
+    get:
+      operationId: transporters_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this transporter profile.
+        required: true
+      tags:
+      - transporters
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransporterProfile'
+          description: ''
+    put:
+      operationId: transporters_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this transporter profile.
+        required: true
+      tags:
+      - transporters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransporterProfile'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransporterProfile'
+          description: ''
+    patch:
+      operationId: transporters_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this transporter profile.
+        required: true
+      tags:
+      - transporters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTransporterProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTransporterProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTransporterProfile'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransporterProfile'
+          description: ''
+    delete:
+      operationId: transporters_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this transporter profile.
+        required: true
+      tags:
+      - transporters
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/:
+    get:
+      operationId: users_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: users_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+          description: ''
+    put:
+      operationId: users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/users/login/:
+    post:
+      operationId: users_login_create
+      description: Login with email and password, returns JWT tokens
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/me/:
+    get:
+      operationId: users_me_retrieve
+      description: Get current user details
+      tags:
+      - users
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/register/:
+    post:
+      operationId: users_register_create
+      description: Register a new user
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/virtual-account-transactions/:
+    get:
+      operationId: virtual_account_transactions_list
+      description: Read-only viewset for virtual account transactions
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: virtual_account
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: webhook_processed
+        schema:
+          type: boolean
+      tags:
+      - virtual-account-transactions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VirtualAccountTransaction'
+          description: ''
+  /api/virtual-account-transactions/{id}/:
+    get:
+      operationId: virtual_account_transactions_retrieve
+      description: Read-only viewset for virtual account transactions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this virtual account transaction.
+        required: true
+      tags:
+      - virtual-account-transactions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccountTransaction'
+          description: ''
+  /api/virtual-account-transactions/my_transactions/:
+    get:
+      operationId: virtual_account_transactions_my_transactions_retrieve
+      description: Get current user's virtual account transactions
+      tags:
+      - virtual-account-transactions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccountTransaction'
+          description: ''
+  /api/virtual-account-transactions/pending_webhooks/:
+    get:
+      operationId: virtual_account_transactions_pending_webhooks_retrieve
+      description: Get transactions with unprocessed webhooks
+      tags:
+      - virtual-account-transactions
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccountTransaction'
+          description: ''
+  /api/virtual-accounts/:
+    get:
+      operationId: virtual_accounts_list
+      description: Viewset for managing virtual accounts
+      parameters:
+      - in: query
+        name: bank_name
+        schema:
+          type: string
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      tags:
+      - virtual-accounts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+    post:
+      operationId: virtual_accounts_create
+      description: Viewset for managing virtual accounts
+      tags:
+      - virtual-accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+  /api/virtual-accounts/{id}/:
+    get:
+      operationId: virtual_accounts_retrieve
+      description: Viewset for managing virtual accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this virtual account.
+        required: true
+      tags:
+      - virtual-accounts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccountDetail'
+          description: ''
+    put:
+      operationId: virtual_accounts_update
+      description: Viewset for managing virtual accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this virtual account.
+        required: true
+      tags:
+      - virtual-accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VirtualAccount'
+        required: true
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+    patch:
+      operationId: virtual_accounts_partial_update
+      description: Viewset for managing virtual accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this virtual account.
+        required: true
+      tags:
+      - virtual-accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVirtualAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVirtualAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVirtualAccount'
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+    delete:
+      operationId: virtual_accounts_destroy
+      description: Viewset for managing virtual accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this virtual account.
+        required: true
+      tags:
+      - virtual-accounts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/virtual-accounts/active_accounts/:
+    get:
+      operationId: virtual_accounts_active_accounts_retrieve
+      description: Get all active virtual accounts
+      tags:
+      - virtual-accounts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+  /api/virtual-accounts/my_accounts/:
+    get:
+      operationId: virtual_accounts_my_accounts_retrieve
+      description: Get current user's virtual accounts
+      tags:
+      - virtual-accounts
+      security:
+      - cookieAuth: []
+      - tokenAuth: []
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualAccount'
+          description: ''
+components:
+  schemas:
+    AvailabilityStatusEnum:
+      enum:
+      - AVAILABLE
+      - LOW_STOCK
+      - SOLD_OUT
+      type: string
+      description: |-
+        * `AVAILABLE` - Available
+        * `LOW_STOCK` - Low Stock
+        * `SOLD_OUT` - Sold Out
+    BlankEnum:
+      enum:
+      - ''
+    BuyerProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        business_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        buyer_type:
+          $ref: '#/components/schemas/BuyerTypeEnum'
+        location:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer_type
+      - created_at
+      - id
+      - location
+      - updated_at
+      - user
+      - user_email
+      - user_full_name
+    BuyerTypeEnum:
+      enum:
+      - INDIVIDUAL
+      - RESTAURANT
+      - WHOLESALER
+      type: string
+      description: |-
+        * `INDIVIDUAL` - Individual
+        * `RESTAURANT` - Restaurant
+        * `WHOLESALER` - Wholesaler
+    CategoryEnum:
+      enum:
+      - VEGETABLES
+      - FRUITS
+      - GRAINS
+      - DAIRY
+      - MEAT
+      - OTHER
+      type: string
+      description: |-
+        * `VEGETABLES` - Vegetables
+        * `FRUITS` - Fruits
+        * `GRAINS` - Grains
+        * `DAIRY` - Dairy
+        * `MEAT` - Meat
+        * `OTHER` - Other
+    ChannelEnum:
+      enum:
+      - USSD
+      - CARD
+      - TRANSFER
+      - VIRTUAL-ACCOUNT
+      type: string
+      description: |-
+        * `USSD` - ussd
+        * `CARD` - card
+        * `TRANSFER` - Transfer
+        * `VIRTUAL-ACCOUNT` - virtual-account
+    CurrencyEnum:
+      enum:
+      - USD
+      - NGN
+      type: string
+      description: |-
+        * `USD` - usd
+        * `NGN` - ngn
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        transporter:
+          type: string
+          format: uuid
+          nullable: true
+        transporter_name:
+          type: string
+          readOnly: true
+        transporter_vehicle:
+          type: string
+          readOnly: true
+        delivery_status:
+          $ref: '#/components/schemas/DeliveryStatusEnum'
+        delivery_address:
+          type: string
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer_name:
+          type: string
+          readOnly: true
+        order_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        picked_up_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer_name
+      - created_at
+      - delivered_at
+      - delivery_address
+      - farmer_name
+      - id
+      - order
+      - order_total
+      - transporter_name
+      - transporter_vehicle
+      - updated_at
+    DeliveryDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        order_details:
+          type: string
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+          nullable: true
+        transporter_details:
+          type: string
+          readOnly: true
+        delivery_status:
+          $ref: '#/components/schemas/DeliveryStatusEnum'
+        delivery_address:
+          type: string
+        picked_up_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - delivery_address
+      - id
+      - order
+      - order_details
+      - transporter_details
+      - updated_at
+    DeliveryStatusEnum:
+      enum:
+      - PENDING
+      - PICKED_UP
+      - IN_TRANSIT
+      - DELIVERED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PICKED_UP` - Picked Up
+        * `IN_TRANSIT` - In Transit
+        * `DELIVERED` - Delivered
+    DeliveryTypeEnum:
+      enum:
+      - PICKUP
+      - DELIVERY
+      type: string
+      description: |-
+        * `PICKUP` - Pickup
+        * `DELIVERY` - Delivery
+    EscrowAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        payment:
+          type: string
+          format: uuid
+        payment_id:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_name:
+          type: string
+          readOnly: true
+        amount_held:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        release_status:
+          $ref: '#/components/schemas/ReleaseStatusEnum'
+        released_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount_held
+      - created_at
+      - farmer
+      - farmer_name
+      - id
+      - payment
+      - payment_id
+      - updated_at
+    FarmerProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        farm_name:
+          type: string
+          maxLength: 255
+        farm_location:
+          type: string
+          maxLength: 255
+        trust_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - farm_location
+      - farm_name
+      - id
+      - updated_at
+      - user
+      - user_email
+      - user_full_name
+    FrequencyEnum:
+      enum:
+      - DAILY
+      - WEEKLY
+      - MONTHLY
+      type: string
+      description: |-
+        * `DAILY` - Daily
+        * `WEEKLY` - Weekly
+        * `MONTHLY` - Monthly
+    NullEnum:
+      enum:
+      - null
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_business_name:
+          type: string
+          readOnly: true
+        buyer_email:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_farm_name:
+          type: string
+          readOnly: true
+        farmer_user_email:
+          type: string
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        order_status:
+          $ref: '#/components/schemas/OrderStatus411Enum'
+        delivery_type:
+          $ref: '#/components/schemas/DeliveryTypeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer
+      - buyer_business_name
+      - buyer_email
+      - created_at
+      - delivery_type
+      - farmer
+      - farmer_farm_name
+      - farmer_user_email
+      - id
+      - total
+      - updated_at
+    OrderDetailWithItems:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_details:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_details:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        order_status:
+          $ref: '#/components/schemas/OrderStatus411Enum'
+        delivery_type:
+          $ref: '#/components/schemas/DeliveryTypeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer
+      - buyer_details
+      - created_at
+      - delivery_type
+      - farmer
+      - farmer_details
+      - id
+      - items
+      - total
+      - updated_at
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        produce:
+          type: string
+          format: uuid
+        produce_name:
+          type: string
+          readOnly: true
+        produce_category:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - order
+      - produce
+      - produce_category
+      - produce_name
+      - quantity
+      - subtotal
+      - unit_price
+      - updated_at
+    OrderStatus411Enum:
+      enum:
+      - PENDING
+      - PAID
+      - PROCESSING
+      - IN_TRANSIT
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PAID` - Paid
+        * `PROCESSING` - Processing
+        * `IN_TRANSIT` - In Transit
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    OrderStatusE02Enum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - DELIVERED
+      - FAILED
+      - SKIPPED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `CONFIRMED` - Confirmed
+        * `DELIVERED` - Delivered
+        * `FAILED` - Failed
+        * `SKIPPED` - Skipped
+    PatchedBuyerProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        business_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        buyer_type:
+          $ref: '#/components/schemas/BuyerTypeEnum'
+        location:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        transporter:
+          type: string
+          format: uuid
+          nullable: true
+        transporter_name:
+          type: string
+          readOnly: true
+        transporter_vehicle:
+          type: string
+          readOnly: true
+        delivery_status:
+          $ref: '#/components/schemas/DeliveryStatusEnum'
+        delivery_address:
+          type: string
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer_name:
+          type: string
+          readOnly: true
+        order_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        picked_up_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedFarmerProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        farm_name:
+          type: string
+          maxLength: 255
+        farm_location:
+          type: string
+          maxLength: 255
+        trust_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_business_name:
+          type: string
+          readOnly: true
+        buyer_email:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_farm_name:
+          type: string
+          readOnly: true
+        farmer_user_email:
+          type: string
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        order_status:
+          $ref: '#/components/schemas/OrderStatus411Enum'
+        delivery_type:
+          $ref: '#/components/schemas/DeliveryTypeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedOrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        produce:
+          type: string
+          format: uuid
+        produce_name:
+          type: string
+          readOnly: true
+        produce_category:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+          nullable: true
+        order:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          readOnly: true
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer_name:
+          type: string
+          readOnly: true
+        order_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        squad_transaction_id:
+          type: string
+          readOnly: true
+          nullable: true
+        payment_method:
+          type: string
+          maxLength: 100
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusF06Enum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        channel:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        escrow_enabled:
+          type: boolean
+        webhook_recieved:
+          type: boolean
+        webhook_verified:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPayout:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        payment:
+          type: string
+          format: uuid
+        payment_id:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+          nullable: true
+        farmer_name:
+          type: string
+          readOnly: true
+          nullable: true
+        rider:
+          type: string
+          format: uuid
+          nullable: true
+        rider_name:
+          type: string
+          readOnly: true
+          nullable: true
+        payout_type:
+          $ref: '#/components/schemas/PayoutTypeEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payout_status:
+          $ref: '#/components/schemas/PayoutStatusEnum'
+        bank_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedProduce:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_farm_name:
+          type: string
+          readOnly: true
+        farmer_user_full_name:
+          type: string
+          readOnly: true
+        produce_name:
+          type: string
+          maxLength: 255
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quantity_available:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        harvest_date:
+          type: string
+          format: date
+        availability_status:
+          $ref: '#/components/schemas/AvailabilityStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedSubscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_name:
+          type: string
+          readOnly: true
+        produce:
+          type: string
+          format: uuid
+        produce_name:
+          type: string
+          readOnly: true
+        produce_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        expected_quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        next_expected_order_date:
+          type: string
+          format: date
+        active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        subscription_start_date:
+          type: string
+          format: date
+          readOnly: true
+        subscription_end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedTransporterProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        vehicle_type:
+          type: string
+          maxLength: 255
+        plate_number:
+          type: string
+          maxLength: 50
+        service_area:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedVirtualAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+        transporter_name:
+          type: string
+          readOnly: true
+          nullable: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_name:
+          type: string
+          readOnly: true
+          nullable: true
+        virtual_account_number:
+          type: string
+          maxLength: 20
+        bank_name:
+          type: string
+          maxLength: 100
+        account_name:
+          type: string
+          maxLength: 255
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        mobile_num:
+          type: string
+          maxLength: 14
+        bvn:
+          type: string
+          maxLength: 11
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+          nullable: true
+        order:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          readOnly: true
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer_name:
+          type: string
+          readOnly: true
+        order_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        squad_transaction_id:
+          type: string
+          readOnly: true
+          nullable: true
+        payment_method:
+          type: string
+          maxLength: 100
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusF06Enum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        channel:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        escrow_enabled:
+          type: boolean
+        webhook_recieved:
+          type: boolean
+        webhook_verified:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - buyer_name
+      - created_at
+      - farmer_name
+      - id
+      - order
+      - order_id
+      - order_total
+      - squad_transaction_id
+      - updated_at
+    PaymentDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        order:
+          type: string
+          format: uuid
+        order_details:
+          type: string
+          readOnly: true
+        squad_transaction_id:
+          type: string
+          nullable: true
+          maxLength: 255
+        payment_method:
+          type: string
+          maxLength: 100
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusF06Enum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        escrow_enabled:
+          type: boolean
+        escrow_details:
+          type: string
+          readOnly: true
+        split_details:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - escrow_details
+      - id
+      - order
+      - order_details
+      - split_details
+      - updated_at
+    PaymentSplit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        payment:
+          type: string
+          format: uuid
+        payment_id:
+          type: string
+          readOnly: true
+        farmer_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        rider_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        platform_fee:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        farmer_processed:
+          type: boolean
+        rider_processed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - payment
+      - payment_id
+      - updated_at
+    PaymentStatus6c6Enum:
+      enum:
+      - PENDING
+      - PAID
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PAID` - Paid
+        * `CANCELLED` - Cancelled
+    PaymentStatusF06Enum:
+      enum:
+      - PENDING
+      - SUCCESS
+      - FAILED
+      - REFUNDED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `SUCCESS` - Success
+        * `FAILED` - Failed
+        * `REFUNDED` - Refunded
+    Payout:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        payment:
+          type: string
+          format: uuid
+        payment_id:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+          nullable: true
+        farmer_name:
+          type: string
+          readOnly: true
+          nullable: true
+        rider:
+          type: string
+          format: uuid
+          nullable: true
+        rider_name:
+          type: string
+          readOnly: true
+          nullable: true
+        payout_type:
+          $ref: '#/components/schemas/PayoutTypeEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payout_status:
+          $ref: '#/components/schemas/PayoutStatusEnum'
+        bank_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - completed_at
+      - created_at
+      - farmer_name
+      - id
+      - payment
+      - payment_id
+      - payout_type
+      - rider_name
+      - updated_at
+    PayoutDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        payment:
+          type: string
+          format: uuid
+        payment_info:
+          type: string
+          readOnly: true
+        farmer_details:
+          type: string
+          readOnly: true
+        rider_details:
+          type: string
+          readOnly: true
+        payout_type:
+          $ref: '#/components/schemas/PayoutTypeEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payout_status:
+          $ref: '#/components/schemas/PayoutStatusEnum'
+        bank_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - farmer_details
+      - id
+      - payment
+      - payment_info
+      - payout_type
+      - rider_details
+      - updated_at
+    PayoutStatusEnum:
+      enum:
+      - PENDING
+      - PROCESSING
+      - COMPLETED
+      - FAILED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PROCESSING` - Processing
+        * `COMPLETED` - Completed
+        * `FAILED` - Failed
+    PayoutTypeEnum:
+      enum:
+      - FARMER
+      - RIDER
+      type: string
+      description: |-
+        * `FARMER` - Farmer
+        * `RIDER` - Rider
+    Produce:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_farm_name:
+          type: string
+          readOnly: true
+        farmer_user_full_name:
+          type: string
+          readOnly: true
+        produce_name:
+          type: string
+          maxLength: 255
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quantity_available:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        harvest_date:
+          type: string
+          format: date
+        availability_status:
+          $ref: '#/components/schemas/AvailabilityStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - created_at
+      - farmer
+      - farmer_farm_name
+      - farmer_user_full_name
+      - harvest_date
+      - id
+      - produce_name
+      - quantity_available
+      - unit_price
+      - updated_at
+    ProduceDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_details:
+          type: string
+          readOnly: true
+        produce_name:
+          type: string
+          maxLength: 255
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        quantity_available:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        harvest_date:
+          type: string
+          format: date
+        availability_status:
+          $ref: '#/components/schemas/AvailabilityStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - created_at
+      - farmer
+      - farmer_details
+      - harvest_date
+      - id
+      - produce_name
+      - quantity_available
+      - unit_price
+      - updated_at
+    ReleaseStatusEnum:
+      enum:
+      - HELD
+      - RELEASED
+      - DISPUTED
+      type: string
+      description: |-
+        * `HELD` - Held
+        * `RELEASED` - Released
+        * `DISPUTED` - Disputed
+    RiderEarnings:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+        transporter_name:
+          type: string
+          readOnly: true
+        delivery:
+          type: string
+          format: uuid
+        delivery_order_id:
+          type: string
+          readOnly: true
+        delivery_address:
+          type: string
+          readOnly: true
+        earnings_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatus6c6Enum'
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - delivery
+      - delivery_address
+      - delivery_order_id
+      - id
+      - transporter
+      - transporter_name
+      - updated_at
+    RiderEarningsDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+        transporter_details:
+          type: string
+          readOnly: true
+        delivery:
+          type: string
+          format: uuid
+        delivery_details:
+          type: string
+          readOnly: true
+        earnings_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatus6c6Enum'
+        paid_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - delivery
+      - delivery_details
+      - id
+      - transporter
+      - transporter_details
+      - updated_at
+    RoleEnum:
+      enum:
+      - BUYER
+      - SELLER
+      - TRANSPORTER
+      type: string
+      description: |-
+        * `BUYER` - Buyer
+        * `SELLER` - Seller
+        * `TRANSPORTER` - Transporter
+    StatusEnum:
+      enum:
+      - ACTIVE
+      - PAUSED
+      - CANCELLED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `PAUSED` - Paused
+        * `CANCELLED` - Cancelled
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_name:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_name:
+          type: string
+          readOnly: true
+        produce:
+          type: string
+          format: uuid
+        produce_name:
+          type: string
+          readOnly: true
+        produce_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        expected_quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        next_expected_order_date:
+          type: string
+          format: date
+        active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        subscription_start_date:
+          type: string
+          format: date
+          readOnly: true
+        subscription_end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer
+      - buyer_name
+      - created_at
+      - farmer
+      - farmer_name
+      - id
+      - next_expected_order_date
+      - produce
+      - produce_name
+      - produce_price
+      - subscription_end_date
+      - subscription_start_date
+      - updated_at
+    SubscriptionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        buyer:
+          type: string
+          format: uuid
+        buyer_details:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_details:
+          type: string
+          readOnly: true
+        produce:
+          type: string
+          format: uuid
+        produce_details:
+          type: string
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyEnum'
+        expected_quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        next_expected_order_date:
+          type: string
+          format: date
+        active:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        subscription_start_date:
+          type: string
+          format: date
+          readOnly: true
+        subscription_end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        orders:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer
+      - buyer_details
+      - created_at
+      - farmer
+      - farmer_details
+      - id
+      - next_expected_order_date
+      - orders
+      - produce
+      - produce_details
+      - subscription_end_date
+      - subscription_start_date
+      - updated_at
+    SubscriptionOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        subscription:
+          type: string
+          format: uuid
+        subscription_id:
+          type: string
+          readOnly: true
+        produce_name:
+          type: string
+          readOnly: true
+        order_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        order_status:
+          $ref: '#/components/schemas/OrderStatusE02Enum'
+        scheduled_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - order_id
+      - produce_name
+      - quantity
+      - scheduled_date
+      - subscription
+      - subscription_id
+      - total_amount
+      - unit_price
+      - updated_at
+    SubscriptionOrderDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        subscription:
+          type: string
+          format: uuid
+        subscription_details:
+          type: string
+          readOnly: true
+        order_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        order_status:
+          $ref: '#/components/schemas/OrderStatusE02Enum'
+        scheduled_date:
+          type: string
+          format: date
+        payment_details:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - order_id
+      - payment_details
+      - quantity
+      - scheduled_date
+      - subscription
+      - subscription_details
+      - total_amount
+      - unit_price
+      - updated_at
+    SubscriptionPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        subscription_order:
+          type: string
+          format: uuid
+        subscription_order_id:
+          type: string
+          readOnly: true
+        order_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        payment_status:
+          $ref: '#/components/schemas/SubscriptionPaymentPaymentStatusEnum'
+        payment_method:
+          type: string
+          maxLength: 100
+        payment_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - created_at
+      - id
+      - order_amount
+      - payment_date
+      - subscription_order
+      - subscription_order_id
+      - updated_at
+    SubscriptionPaymentPaymentStatusEnum:
+      enum:
+      - PENDING
+      - COMPLETED
+      - FAILED
+      - REFUNDED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `COMPLETED` - Completed
+        * `FAILED` - Failed
+        * `REFUNDED` - Refunded
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          writeOnly: true
+      required:
+      - access
+      - refresh
+    TransporterProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        user_email:
+          type: string
+          readOnly: true
+        user_full_name:
+          type: string
+          readOnly: true
+        vehicle_type:
+          type: string
+          maxLength: 255
+        plate_number:
+          type: string
+          maxLength: 50
+        service_area:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - plate_number
+      - service_area
+      - updated_at
+      - user
+      - user_email
+      - user_full_name
+      - vehicle_type
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        password:
+          type: string
+          writeOnly: true
+        password_confirm:
+          type: string
+          writeOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - password
+      - password_confirm
+      - phone_number
+      - role
+      - updated_at
+    UserDetail:
+      type: object
+      description: Serializer for retrieving user details with all related profiles
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
+        farmer_profile:
+          allOf:
+          - $ref: '#/components/schemas/FarmerProfile'
+          readOnly: true
+        buyer_profile:
+          allOf:
+          - $ref: '#/components/schemas/BuyerProfile'
+          readOnly: true
+        transporter_profile:
+          allOf:
+          - $ref: '#/components/schemas/TransporterProfile'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer_profile
+      - created_at
+      - email
+      - farmer_profile
+      - full_name
+      - id
+      - phone_number
+      - role
+      - transporter_profile
+      - updated_at
+    VirtualAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+        transporter_name:
+          type: string
+          readOnly: true
+          nullable: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_name:
+          type: string
+          readOnly: true
+          nullable: true
+        virtual_account_number:
+          type: string
+          maxLength: 20
+        bank_name:
+          type: string
+          maxLength: 100
+        account_name:
+          type: string
+          maxLength: 255
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        mobile_num:
+          type: string
+          maxLength: 14
+        bvn:
+          type: string
+          maxLength: 11
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - account_name
+      - bank_name
+      - bvn
+      - created_at
+      - email
+      - farmer
+      - farmer_name
+      - first_name
+      - id
+      - last_name
+      - mobile_num
+      - transporter
+      - transporter_name
+      - updated_at
+      - virtual_account_number
+    VirtualAccountDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        transporter:
+          type: string
+          format: uuid
+        transporter_details:
+          type: string
+          readOnly: true
+        farmer:
+          type: string
+          format: uuid
+        farmer_details:
+          type: string
+          readOnly: true
+        virtual_account_number:
+          type: string
+          maxLength: 20
+        bank_name:
+          type: string
+          maxLength: 100
+        account_name:
+          type: string
+          maxLength: 255
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        mobile_num:
+          type: string
+          maxLength: 14
+        bvn:
+          type: string
+          maxLength: 11
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - account_name
+      - bank_name
+      - bvn
+      - created_at
+      - email
+      - farmer
+      - farmer_details
+      - first_name
+      - id
+      - last_name
+      - mobile_num
+      - transporter
+      - transporter_details
+      - updated_at
+      - virtual_account_number
+    VirtualAccountTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        virtual_account:
+          type: string
+          format: uuid
+        virtual_account_number:
+          type: string
+          readOnly: true
+        account_owner:
+          type: string
+          readOnly: true
+        transaction_reference:
+          type: string
+          maxLength: 255
+        pricipal_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        settled_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        fee:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        sender:
+          type: string
+          maxLength: 255
+        remarks:
+          type: string
+        currency:
+          type: string
+          maxLength: 3
+        transaction_date:
+          type: string
+          format: date-time
+        webhook_processed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - account_owner
+      - created_at
+      - fee
+      - id
+      - pricipal_amount
+      - remarks
+      - sender
+      - settled_amount
+      - transaction_date
+      - transaction_reference
+      - virtual_account
+      - virtual_account_number
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

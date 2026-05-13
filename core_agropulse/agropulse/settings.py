@@ -15,7 +15,6 @@ from importlib.util import find_spec
 from pathlib import Path
 from decouple import config, Csv
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -50,6 +49,8 @@ THIRD_PARTY_APPS = [
     # OTP APPS
     "django_otp",
     "django_otp.plugins.otp_email",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
 ]
 
 USER_DEFINED_APPS = [
@@ -138,6 +139,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -146,13 +148,23 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "AgroPulse API",
+    "DESCRIPTION": "Agropulse is an AI-powered agricultural commerce platform for farmers, buyers, riders, and operations teams. The project is built with Django and Django REST Framework and currently covers user management, produce management, orders, delivery, payments, and recurring subscriptions.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+}
+
 # Squad Payment Gateway Configuration
 SQUAD_SECRET_KEY = config("SQUAD_SECRET_KEY")
 SQUAD_PUBLIC_KEY = config("SQUAD_PUBLIC_KEY")
 SQUAD_MERCHANT_ID = config("SQUAD_MERCHANT_ID")
 SQUAD_BASE_URL = config("SQUAD_BASE_URL")
 SQUAD_PAYMENT_URL = config("SQUAD_PAYMENT_URL")
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

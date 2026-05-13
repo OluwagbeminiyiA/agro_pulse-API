@@ -20,3 +20,6 @@ migrations:
 
 migrate:
 	poetry run python -m core_agropulse.manage migrate
+
+docs:
+	poetry run python -m core_agropulse.manage spectacular --color --file schema.yml
