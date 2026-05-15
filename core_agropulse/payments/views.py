@@ -114,7 +114,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 amount=int(order.total * 100),
                 currency="NGN",
                 transaction_ref=str(payment.id),
-                callback_url="https://yourdomain.com/api/webhooks/squad/",
+                callback_url="http://localhost:3000/marketplace/checkout/success",
                 metadata={
                     "order_id": str(order.id),
                     "name": order.buyer.user.full_name,
@@ -157,12 +157,27 @@ class PaymentViewSet(viewsets.ModelViewSet):
         try:
             squad_response = squad_service.verify_payment(payment.squad_transaction_id)
 
-            if squad_response.get("status") == "success":
+            status_val = None
+            if isinstance(squad_response, dict):
+                status_val = (
+                    squad_response.get("status")
+                    or squad_response.get("transaction_status")
+                    or squad_response.get("success")
+                )
+
+            if status_val is True or str(status_val).lower() == "success":
                 payment.payment_status = "SUCCESS"
-                payment.payment_method = squad_response.get("payment_method", "card")
+                payment.order.order_status = "PROCESSING"
+                payment.order.save(update_fields=["order_status"])
+                payment.payment_method = (
+                    squad_response.get("payment_method")
+                    or squad_response.get("transaction_type")
+                    or squad_response.get("card_type")
+                    or "card"
+                )
+                payment.gateway_response = squad_response
                 payment.save()
 
-                # Create escrow and split if enabled
                 if payment.escrow_enabled:
                     PaymentService.create_escrow(payment)
                     PaymentService.create_payment_split(payment)
@@ -171,21 +186,29 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
             else:
                 payment.payment_status = "FAILED"
+                payment.gateway_response = squad_response
                 payment.save()
                 return Response(
                     {"error": "Payment verification failed"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    @action(detail=False, methods=["post", "get"], permission_classes=[AllowAny])
     def webhook_callback(self, request):
         """Handle Squad webhook callback"""
         squad_service = SquadService()
+
+        if request.method == "GET":
+            transaction_ref = request.query_params.get(
+                "reference"
+            ) or request.query_params.get("transaction_reference")
+            if transaction_ref:
+                return Response(
+                    {"status": "ok", "transaction_reference": transaction_ref}
+                )
+            return Response({"status": "ok"})
 
         # Get signature from headers
         signature = request.META.get("HTTP_X_SQUAD_SIGNATURE", "")
@@ -211,11 +234,15 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 )
 
             if status_value == "success":
+                payment.order.order_status = "PROCESSING"
+                payment.order.save(update_fields=["order_status"])
                 payment.payment_status = "SUCCESS"
+                payment.channel = data.get("channel", "unknown")
                 payment.payment_method = data.get("payment_method", "card")
                 payment.webhook_recieved = True
                 payment.webhook_verified = True
                 payment.webhook_payload = data
+                payment.gateway_response = data
                 payment.save()
 
                 # Create escrow and split
@@ -228,6 +255,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 payment.webhook_recieved = True
                 payment.webhook_verified = True
                 payment.webhook_payload = data
+                payment.gateway_response = data
                 payment.save()
 
             return Response({"status": "received"})

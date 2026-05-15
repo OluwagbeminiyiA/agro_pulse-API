@@ -60,6 +60,7 @@ USER_DEFINED_APPS = [
     "core_agropulse.delivery.apps.DeliveryConfig",
     "core_agropulse.payments.apps.PaymentsConfig",
     "core_agropulse.subscriptions.apps.SubscriptionsConfig",
+    "core_agropulse.predictions.apps.PredictionsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + USER_DEFINED_APPS
@@ -129,8 +130,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],

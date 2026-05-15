@@ -30,16 +30,25 @@ class SquadService:
                 response = requests.get(
                     url, headers=self.headers, params=params, timeout=30
                 )
-            if method == "POST":
+            elif method == "POST":
                 response = requests.post(
                     url, headers=self.headers, json=data, timeout=30
                 )
-            if method == "DELETE":
+            elif method == "DELETE":
                 response = requests.delete(url, headers=self.headers, timeout=30)
             else:
                 raise ValidationError(f"Unsupported HTTP method: {method}")
 
-            response.raise_for_status()
+            try:
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                try:
+                    body = response.json()
+                except Exception:
+                    body = response.text
+                raise SquadAPIError(
+                    f"API request failed with status {response.status_code}: {body}"
+                ) from e
             return response.json()
 
         except requests.exceptions.RequestException as e:
@@ -81,20 +90,19 @@ class SquadService:
 
         response = self._make_request("POST", endpoint, data)
 
-        if not response.get("SUCCESS"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(f"Payment Initiation failed: {response.get('message')}")
         return response["data"]
 
     def verify_payment(self, transaction_ref):
-        endpoint = f"/transaction/verify/{transaction_ref}"
-        response = self._make_request("GET", endpoint)
+        squad_response = self._make_request(
+            "GET", f"/transaction/verify/{transaction_ref}"
+        )
+        if isinstance(squad_response, dict) and "data" in squad_response:
+            return squad_response["data"]
 
-        if not response.get("success"):
-            raise SquadAPIError(
-                f"Payment Verification failed: {response.get('message')}"
-            )
-
-        return response["data"]
+        # Fallback: return the whole response so the caller can decide how to handle it.
+        return squad_response
 
     def create_virtual_account(
         self,
@@ -132,7 +140,7 @@ class SquadService:
 
         response = self._make_request("POST", endpoint, data=data)
 
-        if not response.get("SUCCESS"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(
                 f"Virtual account creation failed: {response.get('message')}"
             )
@@ -144,7 +152,7 @@ class SquadService:
         endpoint = f"/virtual-account/customer/transactions/{customer_identifier}"
         response = self._make_request("GET", endpoint)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(
                 f"Failed to get transactions: {response.get('message')}"
             )
@@ -156,7 +164,7 @@ class SquadService:
         endpoint = "/virtual-account/webhook/logs"
         response = self._make_request("GET", endpoint)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(
                 f"Failed to get missed webhooks: {response.get('message')}"
             )
@@ -168,7 +176,7 @@ class SquadService:
         endpoint = f"/virtual-account/webhook/logs/{transaction_reference}"
         response = self._make_request("DELETE", endpoint)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(
                 f"Failed to delete webhook log: {response.get('message')}"
             )
@@ -182,7 +190,7 @@ class SquadService:
 
         response = self._make_request("GET", endpoint, params=params)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(f"Account lookup failed: {response.get('message')}")
 
         return response["data"]
@@ -217,7 +225,7 @@ class SquadService:
 
         response = self._make_request("POST", endpoint, data=data)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(
                 f"Transfer initiation failed: {response.get('message')}"
             )
@@ -231,7 +239,7 @@ class SquadService:
 
         response = self._make_request("POST", endpoint, data=data)
 
-        if not response.get("success"):
+        if not response.get("SUCCESS") and not response.get("success"):
             raise SquadAPIError(f"Transfer requery failed: {response.get('message')}")
 
         return response["data"]

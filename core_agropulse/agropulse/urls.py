@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/", include("core_agropulse.delivery.urls")),
     path("api/", include("core_agropulse.payments.urls")),
     path("api/", include("core_agropulse.subscriptions.urls")),
+    path("api/", include("core_agropulse.predictions.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/schema/swagger-ui/",

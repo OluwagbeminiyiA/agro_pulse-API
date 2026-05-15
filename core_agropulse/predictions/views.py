@@ -3,21 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core_agropulse.predictions.models import BuyerBehaviorPrediction, DemandForecast
-
-
-def _buyer_prediction_payload(prediction):
-    return {
-        "id": str(prediction.id),
-        "buyer_id": str(prediction.buyer_id_id),
-        "produce_id": str(prediction.produce_id_id),
-        "predicted_return_date": prediction.predicted_return_date,
-        "predicted_quantity": prediction.predicted_quantity,
-        "return_probability": str(prediction.return_probability),
-        "buyer_category": prediction.buyer_category,
-        "created_at": prediction.created_at,
-        "generated_at": prediction.generated_at,
-    }
+from core_agropulse.accounts.models import BuyerProfile
+from core_agropulse.predictions.services import PredictionEngineService
+from core_agropulse.produce.models import Produce
 
 
 def _demand_forecast_payload(forecast):
@@ -28,125 +16,32 @@ def _demand_forecast_payload(forecast):
         "forecast_period": forecast.forecast_period,
         "demand_spike_probability": str(forecast.demand_spike_probability),
         "recommended_stock_level": forecast.recommended_stock_level,
-        "created_at": forecast.created_at,
         "generated_at": forecast.generated_at,
     }
 
 
-def _latest_buyer_prediction(buyer_id=None, produce_id=None):
-    queryset = BuyerBehaviorPrediction.objects.select_related("buyer_id", "produce_id")
-
-    if buyer_id is not None:
-        queryset = queryset.filter(buyer_id=buyer_id)
-
-    if produce_id is not None:
-        queryset = queryset.filter(produce_id=produce_id)
-
-    return queryset.first()
-
-
-def _latest_demand_forecast(produce_id=None):
-    queryset = DemandForecast.objects.select_related("produce")
-
-    if produce_id is not None:
-        queryset = queryset.filter(produce_id=produce_id)
-
-    return queryset.first()
+def _buyer_prediction_payload(prediction_result):
+    prediction = prediction_result.prediction
+    return {
+        "id": str(prediction.id),
+        "buyer_id": str(prediction.buyer_id_id),
+        "produce_id": str(prediction.produce_id_id),
+        "predicted_return_date": prediction.predicted_return_date,
+        "predicted_quantity": prediction.predicted_quantity,
+        "return_probability": str(prediction.return_probability),
+        "buyer_category": prediction.buyer_category,
+        "confidence": str(prediction_result.confidence),
+        "signals": prediction_result.signals,
+        "generated_at": prediction.generated_at,
+    }
 
 
-class BuyerReturnPredictionView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        buyer_id = request.query_params.get("buyer_id")
-        produce_id = request.query_params.get("produce_id")
-
-        prediction = _latest_buyer_prediction(buyer_id=buyer_id, produce_id=produce_id)
-        if prediction is None:
-            return Response(
-                {"detail": "No buyer return prediction found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        return Response({"prediction": _buyer_prediction_payload(prediction)})
-
-
-class QuantityForecastView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        buyer_id = request.query_params.get("buyer_id")
-        produce_id = request.query_params.get("produce_id")
-
-        prediction = _latest_buyer_prediction(buyer_id=buyer_id, produce_id=produce_id)
-        if prediction is None:
-            return Response(
-                {"detail": "No quantity forecast found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        return Response(
-            {
-                "buyer_id": str(prediction.buyer_id_id),
-                "produce_id": str(prediction.produce_id_id),
-                "predicted_quantity": prediction.predicted_quantity,
-                "predicted_return_date": prediction.predicted_return_date,
-                "generated_at": prediction.generated_at,
-            }
-        )
-
-
-class DemandSpikeView(APIView):
+class DemandRecommendationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         produce_id = request.query_params.get("produce_id")
-
-        forecast = _latest_demand_forecast(produce_id=produce_id)
-        if forecast is None:
-            return Response(
-                {"detail": "No demand spike forecast found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        return Response({"forecast": _demand_forecast_payload(forecast)})
-
-
-class ForecastSummaryView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        buyer_id = request.query_params.get("buyer_id")
-        produce_id = request.query_params.get("produce_id")
-
-        buyer_prediction = _latest_buyer_prediction(
-            buyer_id=buyer_id, produce_id=produce_id
-        )
-        demand_forecast = _latest_demand_forecast(produce_id=produce_id)
-
-        if buyer_prediction is None and demand_forecast is None:
-            return Response(
-                {"detail": "No forecast data available."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        return Response(
-            {
-                "buyer_return_prediction": _buyer_prediction_payload(buyer_prediction)
-                if buyer_prediction
-                else None,
-                "demand_forecast": _demand_forecast_payload(demand_forecast)
-                if demand_forecast
-                else None,
-            }
-        )
-
-
-class RecommendationEngineView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        produce_id = request.query_params.get("produce_id")
+        forecast_period = request.query_params.get("forecast_period", "weekly")
 
         if not produce_id:
             return Response(
@@ -154,41 +49,161 @@ class RecommendationEngineView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        demand_forecast = _latest_demand_forecast(produce_id=produce_id)
-        if demand_forecast is None:
+        try:
+            produce = Produce.objects.get(id=produce_id)
+        except Produce.DoesNotExist:
             return Response(
-                {"detail": "No recommendation data found for the selected produce."},
+                {"detail": "Produce not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        spike_probability = float(demand_forecast.demand_spike_probability)
-        if spike_probability >= 70:
-            recommendation = (
-                "Increase stock aggressively and prepare for a demand surge."
-            )
-            action = "increase_stock"
-        elif spike_probability >= 40:
-            recommendation = (
-                "Monitor stock closely and replenish before the next forecast cycle."
-            )
-            action = "monitor_stock"
-        else:
-            recommendation = (
-                "Maintain current stock levels and continue routine monitoring."
-            )
-            action = "maintain_stock"
+        forecast = PredictionEngineService.generate_demand_forecast(
+            produce=produce,
+            forecast_period=forecast_period,
+        )
 
-        buyer_prediction = _latest_buyer_prediction(produce_id=produce_id)
+        return Response({"demand_forecast": _demand_forecast_payload(forecast)})
+
+
+class SupplierRecommendationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        buyer_id = request.query_params.get("buyer_id")
+        produce_id = request.query_params.get("produce_id")
+        quantity_required = int(request.query_params.get("quantity_required", 1))
+        limit = int(request.query_params.get("limit", 5))
+
+        if not buyer_id or not produce_id:
+            return Response(
+                {"detail": "buyer_id and produce_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            buyer = BuyerProfile.objects.get(id=buyer_id)
+        except BuyerProfile.DoesNotExist:
+            return Response(
+                {"detail": "Buyer profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            produce = Produce.objects.get(id=produce_id)
+        except Produce.DoesNotExist:
+            return Response(
+                {"detail": "Produce not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        recommendations = PredictionEngineService.recommend_suppliers(
+            buyer=buyer,
+            produce=produce,
+            quantity_required=max(1, quantity_required),
+            limit=max(1, min(limit, 20)),
+        )
 
         return Response(
             {
-                "produce_id": produce_id,
-                "recommended_action": action,
-                "recommendation": recommendation,
-                "suggested_stock_level": demand_forecast.recommended_stock_level,
+                "buyer_id": str(buyer.id),
+                "produce_id": str(produce.id),
+                "recommendations": recommendations,
+            }
+        )
+
+
+class BuyerReturnRecommendationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        buyer_id = request.query_params.get("buyer_id")
+        produce_id = request.query_params.get("produce_id")
+
+        if not buyer_id or not produce_id:
+            return Response(
+                {"detail": "buyer_id and produce_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            buyer = BuyerProfile.objects.get(id=buyer_id)
+        except BuyerProfile.DoesNotExist:
+            return Response(
+                {"detail": "Buyer profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            produce = Produce.objects.get(id=produce_id)
+        except Produce.DoesNotExist:
+            return Response(
+                {"detail": "Produce not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        prediction_result = PredictionEngineService.generate_buyer_return_prediction(
+            buyer=buyer,
+            produce=produce,
+        )
+
+        return Response(
+            {"buyer_return_prediction": _buyer_prediction_payload(prediction_result)}
+        )
+
+
+class RecommendationSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        buyer_id = request.query_params.get("buyer_id")
+        produce_id = request.query_params.get("produce_id")
+        forecast_period = request.query_params.get("forecast_period", "weekly")
+
+        if not buyer_id or not produce_id:
+            return Response(
+                {"detail": "buyer_id and produce_id are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            buyer = BuyerProfile.objects.get(id=buyer_id)
+        except BuyerProfile.DoesNotExist:
+            return Response(
+                {"detail": "Buyer profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            produce = Produce.objects.get(id=produce_id)
+        except Produce.DoesNotExist:
+            return Response(
+                {"detail": "Produce not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        demand_forecast = PredictionEngineService.generate_demand_forecast(
+            produce=produce,
+            forecast_period=forecast_period,
+        )
+        buyer_return_prediction = (
+            PredictionEngineService.generate_buyer_return_prediction(
+                buyer=buyer,
+                produce=produce,
+            )
+        )
+        supplier_recommendations = PredictionEngineService.recommend_suppliers(
+            buyer=buyer,
+            produce=produce,
+            quantity_required=buyer_return_prediction.prediction.predicted_quantity,
+            limit=5,
+        )
+
+        return Response(
+            {
                 "demand_forecast": _demand_forecast_payload(demand_forecast),
-                "buyer_return_prediction": _buyer_prediction_payload(buyer_prediction)
-                if buyer_prediction
-                else None,
+                "buyer_return_prediction": _buyer_prediction_payload(
+                    buyer_return_prediction
+                ),
+                "supplier_recommendations": supplier_recommendations,
             }
         )
